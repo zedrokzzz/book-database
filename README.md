@@ -175,4 +175,148 @@ CREATE TABLE Price_history (
 );
 ```
 
+
+---
+# SQL-запросы для базы данных книг
+
+### 1. Топ-5 самых дорогих книг (цена > 500₽)
+
+```sql
+SELECT 
+  b.book_title, 
+  b.price,
+  a.author_last_name
+FROM Books b
+JOIN Authors a ON b.id_author = a.id_author
+WHERE b.price > 500
+ORDER BY b.price DESC
+LIMIT 5 OFFSET 0;
+```
+
+---
+
+### 2. Авторы, у которых средняя цена книг выше 600₽
+
+```sql
+SELECT 
+  a.author_last_name, 
+  AVG(b.price) AS avg_price
+FROM Authors a
+JOIN Books b ON a.id_author = b.id_author
+GROUP BY a.author_last_name
+HAVING AVG(b.price) > 600
+ORDER BY avg_price DESC;
+
+```
+
+---
+
+### 3. Книги в жанре "Научная фантастика"
+
+```sql
+SELECT 
+  b.book_title, 
+  g.name_genre
+FROM Books b
+INNER JOIN Book_genres bg ON b.id_book = bg.id_book
+INNER JOIN Genres g ON bg.id_genre = g.id_genre
+WHERE g.name_genre = 'Science Fiction';
+
+```
+
+---
+
+### 4. Книги в том же жанре, что и "1984"
+
+```sql
+SELECT DISTINCT b.book_title
+FROM Books b
+JOIN Book_genres bg ON b.id_book = bg.id_book
+WHERE bg.id_genre IN (
+  SELECT id_genre
+  FROM Book_genres
+  WHERE id_book = (
+    SELECT id_book FROM Books WHERE book_title = '1984'
+  )
+);
+```
+
+---
+
+### 5. Рейтинг книг по цене для каждого автора
+
+```sql
+SELECT 
+  a.author_last_name,
+  b.book_title,
+  b.price,
+  ROW_NUMBER() OVER (PARTITION BY a.author_last_name ORDER BY b.price DESC) AS price_rank
+FROM Books b
+JOIN Authors a ON b.id_author = a.id_author;
+```
+
+---
+
+### 6. История изменения цены книги "Преступление и наказание"
+
+```sql
+SELECT 
+  ph.date_price,
+  ph.price,
+  LAG(ph.price) OVER (ORDER BY ph.date_price) AS previous_price,
+  ph.price - LAG(ph.price) OVER (ORDER BY ph.date_price) AS price_diff
+FROM Price_history ph
+JOIN Books b ON b.id_book = ph.id_book
+WHERE b.book_title = 'Crime and Punishment';
+```
+
+---
+
+### 7. Самые популярные жанры (по числу книг в каждом жанре)
+
+```sql
+SELECT 
+  g.name_genre, 
+  COUNT(bg.id_book) AS books_in_genre
+FROM Genres g
+JOIN Book_genres bg ON g.id_genre = bg.id_genre
+GROUP BY g.name_genre
+ORDER BY books_in_genre DESC
+LIMIT 5;
+```
+
+---
+
+### 8. Авторы, у которых только одна книга в базе
+
+```sql
+SELECT 
+  a.author_last_name
+FROM Authors a
+JOIN Books b ON a.id_author = b.id_author
+GROUP BY a.author_last_name
+HAVING COUNT(b.id_book) = 1;
+```
+
+---
+
+### 9. Разница между минимальной и максимальной ценой книги
+
+```sql
+SELECT 
+  MAX(price) - MIN(price) AS price_range
+FROM Books;
+```
+
+---
+
+### 10. Список книг, у которых нет истории изменения цены
+
+```sql
+SELECT b.book_title
+FROM Books b
+LEFT JOIN Price_history ph ON b.id_book = ph.id_book
+WHERE ph.id_book IS NULL;
+```
+
 ---

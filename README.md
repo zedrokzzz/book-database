@@ -108,7 +108,7 @@
 ## Скрипт
 ```sql
 -- Создание таблицы Authors (Авторы)
-CREATE TABLE Authors (
+CREATE TABLE IF NOT EXISTS Authors (
     id_author SERIAL PRIMARY KEY,
     author_name VARCHAR(100) NOT NULL,
     author_last_name VARCHAR(100) NOT NULL,
@@ -117,7 +117,7 @@ CREATE TABLE Authors (
 );
 
 -- Создание таблицы Series (Серии)
-CREATE TABLE Series (
+CREATE TABLE IF NOT EXISTS Series (
     id_series INT PRIMARY KEY,
     id_author SERIAL REFERENCES Authors(id_author),
     name_series VARCHAR(225) NOT NULL,
@@ -127,21 +127,21 @@ CREATE TABLE Series (
 );
 
 -- Создание таблицы Genres (Жанры)
-CREATE TABLE Genres (
+CREATE TABLE IF NOT EXISTS Genres (
     id_genre SERIAL PRIMARY KEY,
     name_genre VARCHAR(100) NOT NULL,
     description_genre TEXT
 );
 
 -- Создание таблицы Publishers (Издательства)
-CREATE TABLE Publishers (
+CREATE TABLE IF NOT EXISTS Publishers (
     id_publisher SERIAL PRIMARY KEY,
     name_publisher VARCHAR(225) NOT NULL,
     country_publisher VARCHAR(100) NOT NULL
 );
 
 -- Создание таблицы Books (Книги)
-CREATE TABLE Books (
+CREATE TABLE IF NOT EXISTS Books (
     id_book SERIAL PRIMARY KEY,
     id_author INT REFERENCES Authors(id_author),
     year_of_publication INT NOT NULL,
@@ -153,21 +153,21 @@ CREATE TABLE Books (
 );
 
 -- Создание таблицы Book_genres (Связи книг с жанрами)
-CREATE TABLE Book_genres (
+CREATE TABLE IF NOT EXISTS Book_genres (
     id_book INT REFERENCES Books(id_book),
     id_genre INT REFERENCES Genres(id_genre),
     PRIMARY KEY (id_book, id_genre)
 );
 
 -- Создание таблицы Book_publisher (Связи книг с издательствами)
-CREATE TABLE Book_publisher (
+CREATE TABLE IF NOT EXISTS Book_publisher (
     id_book INT REFERENCES Books(id_book),
     id_publisher INT REFERENCES Publishers(id_publisher),
     PRIMARY KEY (id_book, id_publisher)
 );
 
 -- Создание таблицы Price_history (История цен на книги)
-CREATE TABLE Price_history (
+CREATE TABLE IF NOT EXISTS Price_history (
     id SERIAL PRIMARY KEY,
     id_book INT REFERENCES Books(id_book),
     price INT NOT NULL,

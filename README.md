@@ -320,3 +320,25 @@ WHERE ph.id_book IS NULL;
 ```
 
 ---
+
+### 11. Авторы и количество книг в каждом жанре, которые они написали
+
+```sql
+SELECT 
+  a.author_last_name,
+  g.name_genre,
+  COUNT(*) AS books_in_genre
+FROM (
+  SELECT 
+    b.id_author, 
+    bg.id_genre
+  FROM Books b
+  JOIN Book_genres bg ON b.id_book = bg.id_book
+) AS book_genre_authors
+JOIN Authors a ON book_genre_authors.id_author = a.id_author
+JOIN Genres g ON book_genre_authors.id_genre = g.id_genre
+GROUP BY a.author_last_name, g.name_genre
+ORDER BY books_in_genre DESC;
+```
+
+---

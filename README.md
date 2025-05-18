@@ -182,12 +182,13 @@ CREATE TABLE IF NOT EXISTS Price_history (
 ### 1. Топ-5 самых дорогих книг (цена > 500₽)
 
 ```sql
-SELECT 
-  b.book_title, 
+SELECT
+  b.book_title,
   b.price,
+  a.author_name,
   a.author_last_name
 FROM Books b
-JOIN Authors a ON b.id_author = a.id_author
+JOIN Authors a ON a.id_author = b.id_author
 WHERE b.price > 500
 ORDER BY b.price DESC
 LIMIT 5 OFFSET 0;
@@ -198,15 +199,15 @@ LIMIT 5 OFFSET 0;
 ### 2. Авторы, у которых средняя цена книг выше 600₽
 
 ```sql
-SELECT 
+SELECT
+  a.author_name,
   a.author_last_name, 
-  AVG(b.price) AS avg_price
+  ROUND(AVG(b.price), 0) AS avg_price
 FROM Authors a
 JOIN Books b ON a.id_author = b.id_author
-GROUP BY a.author_last_name
+GROUP BY a.author_name, a.author_last_name
 HAVING AVG(b.price) > 600
 ORDER BY avg_price DESC;
-
 ```
 
 ---

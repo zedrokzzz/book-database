@@ -343,7 +343,6 @@ ORDER BY
   a.author_last_name,
   a.author_name,
   books_in_genre DESC;
-![image](https://github.com/user-attachments/assets/4bb6f81a-91e4-463b-8fe9-4f143e2b7a2c)
 
 ```
 

@@ -315,8 +315,14 @@ FROM Books;
 ```sql
 SELECT b.book_title
 FROM Books b
-LEFT JOIN Price_history ph ON b.id_book = ph.id_book
-WHERE ph.id_book IS NULL;
+JOIN (
+    SELECT id_book
+    FROM Price_history
+    GROUP BY id_book
+    HAVING COUNT(*) = 1
+) 
+single_price ON b.id_book = single_price.id_book;
+
 ```
 
 ---

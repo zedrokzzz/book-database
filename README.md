@@ -215,14 +215,16 @@ ORDER BY avg_price DESC;
 ### 3. Книги в жанре "Научная фантастика"
 
 ```sql
-SELECT 
+SELECT
+  a.author_name,
+  a.author_last_name,
   b.book_title, 
   g.name_genre
 FROM Books b
-INNER JOIN Book_genres bg ON b.id_book = bg.id_book
-INNER JOIN Genres g ON bg.id_genre = g.id_genre
+JOIN Authors a ON a.id_author = b.id_author
+JOIN Book_genres bg ON b.id_book = bg.id_book
+JOIN Genres g ON bg.id_genre = g.id_genre
 WHERE g.name_genre = 'Science Fiction';
-
 ```
 
 ---
@@ -237,7 +239,9 @@ WHERE bg.id_genre IN (
   SELECT id_genre
   FROM Book_genres
   WHERE id_book = (
-    SELECT id_book FROM Books WHERE book_title = '1984'
+    SELECT id_book
+    FROM Books
+    WHERE book_title = '1984'
   )
 );
 ```
@@ -247,13 +251,20 @@ WHERE bg.id_genre IN (
 ### 5. Рейтинг книг по цене для каждого автора
 
 ```sql
-SELECT 
-  a.author_last_name,
-  b.book_title,
-  b.price,
-  ROW_NUMBER() OVER (PARTITION BY a.author_last_name ORDER BY b.price DESC) AS price_rank
-FROM Books b
-JOIN Authors a ON b.id_author = a.id_author;
+SELECT
+    a.author_name,
+    a.author_last_name,
+    b.book_title,
+    b.price,
+    ROW_NUMBER() OVER (
+        PARTITION BY a.id_author
+        ORDER BY b.price DESC
+    ) AS price_rank
+FROM 
+    Books b
+JOIN 
+    Authors a 
+    ON b.id_author = a.id_author;
 ```
 
 ---
@@ -288,20 +299,8 @@ LIMIT 5;
 
 ---
 
-### 8. Авторы, у которых только одна книга в базе
 
-```sql
-SELECT 
-  a.author_last_name
-FROM Authors a
-JOIN Books b ON a.id_author = b.id_author
-GROUP BY a.author_last_name
-HAVING COUNT(b.id_book) = 1;
-```
-
----
-
-### 9. Разница между минимальной и максимальной ценой книги
+### 8. Разница между минимальной и максимальной ценой книги
 
 ```sql
 SELECT 
@@ -311,7 +310,7 @@ FROM Books;
 
 ---
 
-### 10. Список книг, у которых нет истории изменения цены
+### 9. Список книг, у которых нет истории изменения цены
 
 ```sql
 SELECT b.book_title
@@ -322,24 +321,24 @@ WHERE ph.id_book IS NULL;
 
 ---
 
-### 11. Авторы и количество книг в каждом жанре, которые они написали
+### 10. Авторы и количество книг в каждом жанре, которые они написали
 
 ```sql
 SELECT 
-  a.author_last_name,
+  a.author_name || ' ' || a.author_last_name AS full_author_name,
   g.name_genre,
-  COUNT(*) AS books_in_genre
-FROM (
-  SELECT 
-    b.id_author, 
-    bg.id_genre
-  FROM Books b
-  JOIN Book_genres bg ON b.id_book = bg.id_book
-) AS book_genre_authors
-JOIN Authors a ON book_genre_authors.id_author = a.id_author
-JOIN Genres g ON book_genre_authors.id_genre = g.id_genre
-GROUP BY a.author_last_name, g.name_genre
-ORDER BY books_in_genre DESC;
+  COUNT(DISTINCT b.id_book) AS books_in_genre
+FROM Books b
+JOIN Authors a ON b.id_author = a.id_author
+JOIN Book_genres bg ON b.id_book = bg.id_book
+JOIN Genres g ON bg.id_genre = g.id_genre
+GROUP BY a.author_name, a.author_last_name, g.name_genre
+ORDER BY 
+  a.author_last_name,
+  a.author_name,
+  books_in_genre DESC;
+![image](https://github.com/user-attachments/assets/4bb6f81a-91e4-463b-8fe9-4f143e2b7a2c)
+
 ```
 
 ---

@@ -221,10 +221,11 @@ SELECT
   b.book_title, 
   g.name_genre
 FROM Books b
-JOIN Authors a ON a.id_author = b.id_author
+LEFT JOIN Authors a ON a.id_author = b.id_author 
 JOIN Book_genres bg ON b.id_book = bg.id_book
 JOIN Genres g ON bg.id_genre = g.id_genre
 WHERE g.name_genre = 'Science Fiction';
+
 ```
 
 ---
@@ -235,10 +236,11 @@ WHERE g.name_genre = 'Science Fiction';
 SELECT DISTINCT b.book_title
 FROM Books b
 JOIN Book_genres bg ON b.id_book = bg.id_book
-WHERE bg.id_genre IN (
-  SELECT id_genre
-  FROM Book_genres
-  WHERE id_book = (
+WHERE EXISTS (
+  SELECT 1
+  FROM Book_genres bg2
+  WHERE bg2.id_genre = bg.id_genre
+  AND bg2.id_book = (
     SELECT id_book
     FROM Books
     WHERE book_title = '1984'
@@ -290,8 +292,8 @@ WHERE b.book_title = 'Crime and Punishment';
 SELECT 
   g.name_genre, 
   COUNT(bg.id_book) AS books_in_genre
-FROM Genres g
-JOIN Book_genres bg ON g.id_genre = bg.id_genre
+FROM Book_genres bg
+RIGHT JOIN Genres g ON g.id_genre = bg.id_genre
 GROUP BY g.name_genre
 ORDER BY books_in_genre DESC
 LIMIT 5;
@@ -343,7 +345,6 @@ ORDER BY
   a.author_last_name,
   a.author_name,
   books_in_genre DESC;
-
 ```
 
 ---
